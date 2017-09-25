@@ -8,6 +8,8 @@ int main(int argc, char *argv[])
     PointsController controller;
     controller.readPoints(pointsFilePath);
     controller.readPlanePoints(planeFilePath);
+    controller.computePlane();
+    controller.computeProjections();
 
     return 0;
 }

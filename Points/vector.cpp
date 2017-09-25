@@ -100,6 +100,12 @@ Vector Vector::operator*(const Vector& v) const
     return r;
 }
 
+double Vector::dot(const Vector &v)
+{
+    double r = m_x * v.m_x + m_y * v.m_y + m_z * v.m_z;
+    return r;
+}
+
 std::istream& operator>>(std::istream& s, Vector& v)
 {
     char c = 0;

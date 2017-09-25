@@ -32,8 +32,9 @@ public:
     ///
     Vector operator+(const Vector &v) const;
     Vector operator-(const Vector &v) const;
-    friend Vector operator*(const double& a, const Vector& v);
-    Vector operator*(const Vector& v) const;
+    friend Vector operator*(const double &a, const Vector &v);
+    Vector operator*(const Vector &v) const;
+    double dot(const Vector &v);
 
     ///
     /// \brief stream operators
