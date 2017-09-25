@@ -1,6 +1,8 @@
 #ifndef _VECTOR_H_
 #define _VECTOR_H_
 
+#include <iostream>
+
 class Vector
 {
 public:
@@ -19,6 +21,7 @@ public:
     double x() const;
     double y() const;
     double z() const;
+    bool readError();
 
     void setX(const double &x);
     void setY(const double &y);
@@ -32,11 +35,16 @@ public:
     friend Vector operator*(const double& a, const Vector& v);
     Vector operator*(const Vector& v) const;
 
+    ///
+    /// \brief stream operators
+    ///
+    friend std::istream& operator>>(std::istream& s, Vector& v);
 
 private:
     double m_x;
     double m_y;
     double m_z;
+    bool m_readError;
 };
 
 #endif
