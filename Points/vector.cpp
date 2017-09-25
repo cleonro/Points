@@ -106,7 +106,7 @@ double Vector::dot(const Vector &v)
     return r;
 }
 
-std::istream& operator>>(std::istream& s, Vector& v)
+std::istream& operator>>(std::istream &s, Vector &v)
 {
     char c = 0;
     s >> v.m_x >> c;
@@ -122,5 +122,11 @@ std::istream& operator>>(std::istream& s, Vector& v)
         return s;
     }
     s >> v.m_z;
+    return s;
+}
+
+std::ostream& operator<<(std::ostream &s, Vector &v)
+{
+    s << v.m_x << ", " << v.m_y << ", " << v.m_z;
     return s;
 }

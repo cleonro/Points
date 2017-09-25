@@ -4,6 +4,7 @@
 #include "vector.h"
 #include <vector>
 #include <string>
+#include <map>
 
 class PointsController
 {
@@ -17,12 +18,16 @@ public:
     bool readPlanePoints(const std::string &filePath);
     bool computePlane();
     void computeProjections();
+    void sortProjections();
+    bool writeProjections(const std::string &filePath);
+    bool writeSortedProjections(const std::string &filePath);
 
 private:
     std::vector<Vector> m_points;
     Vector m_plane[3];
     Vector m_planeNormal;
     std::vector<Vector> m_projections;
+    std::map<double, Vector> m_sortedProjections;
 };
 
 #endif

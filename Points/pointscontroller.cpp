@@ -97,3 +97,70 @@ void PointsController::computeProjections()
     }
     std::cout << "Computed " << m_projections.size() << " projected points!" << std::endl;
 }
+
+void PointsController::sortProjections()
+{
+    m_sortedProjections.clear();
+    if(m_projections.size() == 0 || m_projections.size() != m_points.size())
+    {
+        return;
+    }
+    Vector v;
+    double dist = 0.0;
+    for(size_t i = 0; i < m_projections.size(); ++i)
+    {
+        v = m_points[i] - m_projections[i];
+        dist = sqrt(v.dot(v));
+        m_sortedProjections[dist] = m_projections[i];
+    }
+
+    //just for testing
+    for(std::map<double, Vector>::iterator it = m_sortedProjections.begin(); it != m_sortedProjections.end(); ++it)
+    {
+        std::cout << it->second << ", " << it->first << std::endl;
+    }
+
+    std::cout << "Sorted " << m_sortedProjections.size() << " projected points!" << std::endl;
+}
+
+bool PointsController::writeProjections(const std::string &filePath)
+{
+    std::filebuf cacheFile;
+    if(!cacheFile.open(filePath, std::ios::out))
+    {
+        return false;
+    }
+    std::ostream cache(&cacheFile);
+
+    for(size_t i = 0; i < m_projections.size(); ++i)
+    {
+        cache << m_projections[i] << std::endl;
+        if(!cache)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool PointsController::writeSortedProjections(const std::string &filePath)
+{
+    std::filebuf cacheFile;
+    if(!cacheFile.open(filePath, std::ios::out))
+    {
+        return false;
+    }
+    std::ostream cache(&cacheFile);
+
+    for(std::map<double, Vector>::iterator it = m_sortedProjections.begin(); it != m_sortedProjections.end(); ++it)
+    {
+        cache << it->second << ", " << it->first << std::endl;
+        if(!cache)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
