@@ -6,6 +6,10 @@
 #include <string>
 #include <map>
 
+#include <vtkSmartPointer.h>
+
+class vtkRenderer;
+
 class PointsController
 {
     static double sZero;
@@ -21,6 +25,11 @@ public:
     void sortProjections();
     bool writeProjections(const std::string &filePath);
     bool writeSortedProjections(const std::string &filePath);
+
+    void showVTKScene();
+
+private:
+    void buildVTKScene(vtkSmartPointer<vtkRenderer> renderer);
 
 private:
     std::vector<Vector> m_points;

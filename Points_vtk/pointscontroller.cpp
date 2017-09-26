@@ -3,6 +3,23 @@
 #include <fstream>
 #include <cmath>
 
+#include <vtkPlaneSource.h>
+#include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkProperty.h>
+#include <vtkAxesActor.h>
+#include <vtkCaptionActor2D.h>
+#include <vtkTextActor.h>
+#include <vtkTextProperty.h>
+#include <vtkLine.h>
+#include <vtkCamera.h>
+
 double PointsController::sZero = 0.0000001;
 
 PointsController::PointsController()
@@ -86,7 +103,7 @@ void PointsController::computeProjections()
     {
         v = m_points[i];
         Vector v0 = v - m_plane[0];
-        vp = v - m_planeNormal.dot(v0) * v0;
+        vp = v - m_planeNormal.dot(v0) * m_planeNormal;
         m_projections.push_back(vp);
         //just for testing
         if(m_planeNormal.dot(vp - m_plane[0]) > sZero)
@@ -163,4 +180,97 @@ bool PointsController::writeSortedProjections(const std::string &filePath)
     }
 
     return true;
+}
+
+void PointsController::showVTKScene()
+{
+    vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+    vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+    renderWindow->AddRenderer(renderer);
+    vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+    renderWindowInteractor->SetRenderWindow(renderWindow);
+    vtkSmartPointer<vtkInteractorStyleTrackballCamera> interactorStyle = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
+    renderWindowInteractor->SetInteractorStyle(interactorStyle);
+    renderer->SetBackground(0.1, 0.2, 0.3);
+
+    buildVTKScene(renderer);
+
+    vtkCamera* camera = renderer->GetActiveCamera();
+    camera->SetPosition(150.0, 150.0, 150.0);
+    camera->SetFocalPoint(0.0, 0.0, 0.0);
+
+    renderWindow->SetSize(1280, 1024);
+    renderWindow->Render();
+    renderWindowInteractor->Start();
+}
+
+void PointsController::buildVTKScene(vtkSmartPointer<vtkRenderer> renderer)
+{
+    //axes
+    vtkSmartPointer<vtkAxesActor> axes = vtkSmartPointer<vtkAxesActor>::New();
+    axes->SetTotalLength(100.0, 100.0, 100.0);
+    axes->SetConeRadius(0.1);
+    axes->SetAxisLabels(0);
+    axes->GetXAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
+    axes->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+    axes->GetYAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
+    axes->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+    axes->GetZAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
+    axes->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+    renderer->AddActor(axes);
+
+    //plane
+    vtkSmartPointer<vtkPlaneSource> planeSource = vtkSmartPointer<vtkPlaneSource>::New();
+    //planeSource->SetCenter(m_plane[0].x(), m_plane[0].y(), m_plane[0].z());
+    //planeSource->SetNormal(m_planeNormal.x(), m_planeNormal.y(), m_planeNormal.z());
+
+    double planeSize = 1000.0;
+    Vector axis1 = m_plane[1] - m_plane[0];
+    axis1 = (1.0 / sqrt(axis1.dot(axis1))) * axis1;
+    Vector axis2 = m_planeNormal * axis1;
+    Vector origin = m_plane[0] - planeSize * axis1 - planeSize * axis2;
+    Vector point1 = origin + 2.0 * planeSize * axis1;
+    Vector point2 = origin + 2.0 * planeSize * axis2;
+
+    planeSource->SetOrigin(origin.x(), origin.y(), origin.z());
+    planeSource->SetPoint1(point1.x(), point1.y(), point1.z());
+    planeSource->SetPoint2(point2.x(), point2.y(), point2.z());
+
+    planeSource->SetResolution(200, 200);
+
+    planeSource->Update();
+
+    vtkPolyData* plane = planeSource->GetOutput();
+    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    mapper->SetInputData(plane);
+    vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+    actor->SetMapper(mapper);
+    actor->GetProperty()->SetRepresentationToWireframe();
+    renderer->AddActor(actor);
+
+    //lines
+    vtkSmartPointer<vtkPoints> vtkpoints = vtkSmartPointer<vtkPoints>::New();
+    for(size_t i = 0; i < m_points.size(); ++i)
+    {
+        vtkpoints->InsertNextPoint(m_points[i].x(), m_points[i].y(), m_points[i].z());
+        vtkpoints->InsertNextPoint(m_projections[i].x(), m_projections[i].y(), m_projections[i].z());
+    }
+    vtkSmartPointer<vtkCellArray> cellarray = vtkSmartPointer<vtkCellArray>::New();
+    int count = vtkpoints->GetNumberOfPoints() / 2;
+    for(int i = 0; i < count - 1; ++i)
+    {
+        vtkSmartPointer<vtkLine> vtkline = vtkSmartPointer<vtkLine>::New();
+        vtkline->GetPointIds()->SetId(0, 2 * i);
+        vtkline->GetPointIds()->SetId(1, 2 * i + 1);
+        cellarray->InsertNextCell(vtkline);
+    }
+    vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
+    polydata->SetPoints(vtkpoints);
+    polydata->SetLines(cellarray);
+    vtkSmartPointer<vtkPolyDataMapper> segMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    segMapper->SetInputData(polydata);
+    vtkSmartPointer<vtkActor> pathActor = vtkSmartPointer<vtkActor>::New();
+    pathActor->SetMapper(segMapper);
+    renderer->AddActor(pathActor);
+
 }

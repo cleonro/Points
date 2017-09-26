@@ -86,7 +86,7 @@ void PointsController::computeProjections()
     {
         v = m_points[i];
         Vector v0 = v - m_plane[0];
-        vp = v - m_planeNormal.dot(v0) * v0;
+        vp = v - m_planeNormal.dot(v0) * m_planeNormal;
         m_projections.push_back(vp);
         //just for testing
         if(m_planeNormal.dot(vp - m_plane[0]) > sZero)

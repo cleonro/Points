@@ -49,7 +49,10 @@ int main(int argc, char *argv[])
     if(!controller.writeSortedProjections(sortedProjectionsFilePath))
     {
         std::cout << "Sorted projections file was not written!" << std::endl;
+        return 6;
     }
+
+    controller.showVTKScene();
 
     return 0;
 }
