@@ -40,7 +40,7 @@ public:
     /// \brief stream operators
     ///
     friend std::istream& operator>>(std::istream &s, Vector& v);
-    friend std::ostream& operator<<(std::ostream &s, Vector& v);
+    friend std::ostream& operator<<(std::ostream &s, const Vector& v);
 
 private:
     double m_x;

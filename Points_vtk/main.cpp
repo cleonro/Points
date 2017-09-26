@@ -1,6 +1,38 @@
 
 #include "pointscontroller.h"
 
+#include <cmath>
+#include <fstream>
+#include <iostream>
+
+void generate()
+{
+    int n = 20;
+    double h = 10;
+    double t = 2.0 * M_PI / 50.0;
+    double R = 40.0;
+
+    std::filebuf planeFileBuf;
+    planeFileBuf.open("PlanePoints0.csv", std::ios::out);
+    std::ostream planeFile(&planeFileBuf);
+    planeFile << Vector(0, 0, 0) << std::endl;
+    planeFile << Vector(10, 0, 0) << std::endl;
+    planeFile << Vector(0, 10, 0) << std::endl;
+    planeFileBuf.close();
+
+    std::filebuf pointsFileBuf;
+    pointsFileBuf.open("Points0.csv", std::ios::out);
+    std::ostream pointsFile(&pointsFileBuf);
+    for(int i = 0; i < n; ++i)
+    {
+        double x = R * cos(t * i);
+        double y = R * sin(t * i);
+        double z = h * i;
+        pointsFile << Vector(x, y, z) << std::endl;
+    }
+    pointsFileBuf.close();
+}
+
 ///
 /// \brief The program requires four parameters:
 ///         file path for the points
@@ -13,15 +45,25 @@
 ///
 int main(int argc, char *argv[])
 {
+    std::string pointsFilePath;
+    std::string planeFilePath;
+    std::string projectionsFilePath;
+    std::string sortedProjectionsFilePath;
     if(argc < 5)
     {
-        std::cout << "Not enough parameters!" << std::endl;
-        return 1;
+        generate();
+        pointsFilePath = "Points0.csv";
+        planeFilePath = "PlanePoints0.csv";
+        projectionsFilePath = "Projections0.csv";
+        sortedProjectionsFilePath = "SortedProjections0.csv";
     }
-    std::string pointsFilePath = argv[1];//("Points.csv");
-    std::string planeFilePath = argv[2];//("PlanePoints.csv");
-    std::string projectionsFilePath = argv[3];//("Projections.csv");
-    std::string sortedProjectionsFilePath = argv[4];//("SortedProjections.csv");
+    else
+    {
+        pointsFilePath = argv[1];
+        planeFilePath = argv[2];
+        projectionsFilePath = argv[3];
+        sortedProjectionsFilePath = argv[4];
+    }
 
     PointsController controller;
     if(!controller.readPoints(pointsFilePath))

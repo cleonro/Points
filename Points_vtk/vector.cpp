@@ -125,7 +125,7 @@ std::istream& operator>>(std::istream &s, Vector &v)
     return s;
 }
 
-std::ostream& operator<<(std::ostream &s, Vector &v)
+std::ostream& operator<<(std::ostream &s, const Vector &v)
 {
     s << v.m_x << ", " << v.m_y << ", " << v.m_z;
     return s;
