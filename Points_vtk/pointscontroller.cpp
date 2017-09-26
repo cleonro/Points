@@ -248,29 +248,56 @@ void PointsController::buildVTKScene(vtkSmartPointer<vtkRenderer> renderer)
     actor->GetProperty()->SetRepresentationToWireframe();
     renderer->AddActor(actor);
 
-    //lines
-    vtkSmartPointer<vtkPoints> vtkpoints = vtkSmartPointer<vtkPoints>::New();
+    //lines 1
+    vtkSmartPointer<vtkPoints> vtkpoints1 = vtkSmartPointer<vtkPoints>::New();
     for(size_t i = 0; i < m_points.size(); ++i)
     {
-        vtkpoints->InsertNextPoint(m_points[i].x(), m_points[i].y(), m_points[i].z());
-        vtkpoints->InsertNextPoint(m_projections[i].x(), m_projections[i].y(), m_projections[i].z());
+        vtkpoints1->InsertNextPoint(m_points[i].x(), m_points[i].y(), m_points[i].z());
+        vtkpoints1->InsertNextPoint(m_projections[i].x(), m_projections[i].y(), m_projections[i].z());
     }
-    vtkSmartPointer<vtkCellArray> cellarray = vtkSmartPointer<vtkCellArray>::New();
-    int count = vtkpoints->GetNumberOfPoints() / 2;
-    for(int i = 0; i < count - 1; ++i)
+    vtkSmartPointer<vtkCellArray> cellarray1 = vtkSmartPointer<vtkCellArray>::New();
+    int count = vtkpoints1->GetNumberOfPoints() / 2;
+    for(int i = 0; i < count; ++i)
     {
         vtkSmartPointer<vtkLine> vtkline = vtkSmartPointer<vtkLine>::New();
         vtkline->GetPointIds()->SetId(0, 2 * i);
         vtkline->GetPointIds()->SetId(1, 2 * i + 1);
-        cellarray->InsertNextCell(vtkline);
+        cellarray1->InsertNextCell(vtkline);
     }
-    vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
-    polydata->SetPoints(vtkpoints);
-    polydata->SetLines(cellarray);
-    vtkSmartPointer<vtkPolyDataMapper> segMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    segMapper->SetInputData(polydata);
-    vtkSmartPointer<vtkActor> pathActor = vtkSmartPointer<vtkActor>::New();
-    pathActor->SetMapper(segMapper);
-    renderer->AddActor(pathActor);
+    vtkSmartPointer<vtkPolyData> polydata1 = vtkSmartPointer<vtkPolyData>::New();
+    polydata1->SetPoints(vtkpoints1);
+    polydata1->SetLines(cellarray1);
+    vtkSmartPointer<vtkPolyDataMapper> segMapper1 = vtkSmartPointer<vtkPolyDataMapper>::New();
+    segMapper1->SetInputData(polydata1);
+    vtkSmartPointer<vtkActor> pathActor1 = vtkSmartPointer<vtkActor>::New();
+    pathActor1->SetMapper(segMapper1);
+    renderer->AddActor(pathActor1);
+    pathActor1->GetProperty()->SetColor(1.0, 1.0, 0.1);
+
+    //lines 2
+    vtkSmartPointer<vtkPoints> vtkpoints2 = vtkSmartPointer<vtkPoints>::New();
+    for(std::map<double, Vector>::iterator it = m_sortedProjections.begin(); it != m_sortedProjections.end(); ++it)
+    {
+        Vector v = it->second;
+        vtkpoints2->InsertNextPoint(v.x(), v.y(), v.z());
+    }
+    vtkSmartPointer<vtkCellArray> cellarray2 = vtkSmartPointer<vtkCellArray>::New();
+    count = vtkpoints2->GetNumberOfPoints();
+    for(int i = 0; i < count - 1; ++i)
+    {
+        vtkSmartPointer<vtkLine> vtkline = vtkSmartPointer<vtkLine>::New();
+        vtkline->GetPointIds()->SetId(0, i);
+        vtkline->GetPointIds()->SetId(1, i + 1);
+        cellarray2->InsertNextCell(vtkline);
+    }
+    vtkSmartPointer<vtkPolyData> polydata2 = vtkSmartPointer<vtkPolyData>::New();
+    polydata2->SetPoints(vtkpoints2);
+    polydata2->SetLines(cellarray2);
+    vtkSmartPointer<vtkPolyDataMapper> segMapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
+    segMapper2->SetInputData(polydata2);
+    vtkSmartPointer<vtkActor> pathActor2 = vtkSmartPointer<vtkActor>::New();
+    pathActor2->SetMapper(segMapper2);
+    renderer->AddActor(pathActor2);
+    pathActor2->GetProperty()->SetColor(1.0, 0.1, 1.0);
 
 }
